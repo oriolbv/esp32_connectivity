@@ -1,4 +1,7 @@
+import 'package:esp32_connectivity/pages/bluetooth_page.dart';
+import 'package:esp32_connectivity/pages/general_page.dart';
 import 'package:esp32_connectivity/pages/results_page.dart';
+import 'package:esp32_connectivity/pages/wifi_page.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
@@ -21,6 +24,20 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _counter = 0;
+  int _currentIndex = 0;
+  List _listPages = [];
+  Widget _currentPage = const GeneralPage(title: "General");
+  
+  @override
+  void initState() {
+    super.initState();
+    _listPages
+    ..add(GeneralPage(title: "General",))
+    ..add(BluetoothPage(title: "Bluetooth",))
+    ..add(WifiPage(title: "Wifi",));
+    _currentPage = const GeneralPage(title: "General");
+  }
+
 
   void _incrementCounter() {
     setState(() {
@@ -33,7 +50,12 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-
+void _changePage(int selectedIndex) {
+      setState(() {
+        _currentIndex = selectedIndex;
+        _currentPage = _listPages[selectedIndex];
+      });
+    }
 
   @override
   Widget build(BuildContext context) {
@@ -49,59 +71,33 @@ class _HomePageState extends State<HomePage> {
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-            ElevatedButton(onPressed: (){Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const ResultsPage(title: "hola que ase")),
-            );}, child: null,)
-
-
-/*     child: ElevatedButton(
-          child: const Text('Open route'),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const SecondRoute()),
-            );
-          },
-        ),*/
-
-
-
-          ],
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: _currentPage,
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.cake),
+            label: 'General',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.sentiment_satisfied),
+            label: 'Bluetooth',
+          ),
+            BottomNavigationBarItem(
+            icon: Icon(Icons.access_alarm),
+            label: 'Wifi',
+          ),
+        ],
+        onTap: (selectedIndex) => _changePage(selectedIndex),
+      ),
     );
+
+    
+
   }
 }

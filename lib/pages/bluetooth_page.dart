@@ -1,63 +1,117 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 
-class BluetoothPage extends StatefulWidget {
-  const BluetoothPage({Key? key, required this.title}) : super(key: key);
+class BluetoothPage extends StatelessWidget {
+  const BluetoothPage({Key? key, required this.title, required this.state}) : super(key: key);
 
   final String title;
-
-  @override
-  State<BluetoothPage> createState() => _BluetoothPageState();
-}
-
-class _BluetoothPageState extends State<BluetoothPage> {
-  int _counter = 0;
-
+  final BluetoothState state;
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
+      backgroundColor: Colors.lightBlue,
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+            const Icon(
+              Icons.bluetooth_disabled,
+              size: 200.0,
+              color: Colors.white54,
             ),
             Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
+              'Bluetooth Adapter is ${state.toString().substring(15)}.',
+              style: Theme.of(context)
+                  .primaryTextTheme
+                  .subtitle1
             ),
           ],
         ),
       ),
     );
+
   }
 }
+
+class FindDevicesScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Find Devices'),
+      ),
+      body: RefreshIndicator(
+        onRefresh: () =>
+            FlutterBlue.instance.startScan(timeout: Duration(seconds: 4)),
+        child: SingleChildScrollView(
+          child: Column(
+            children: <Widget>[
+              StreamBuilder<List<BluetoothDevice>>(
+                stream: Stream.periodic(Duration(seconds: 2))
+                    .asyncMap((_) => FlutterBlue.instance.connectedDevices),
+                initialData: [],
+                builder: (c, snapshot) => Column(
+                  children: snapshot.data
+                      .map((d) => ListTile(
+                            title: Text(d.name),
+                            subtitle: Text(d.id.toString()),
+                            trailing: StreamBuilder<BluetoothDeviceState>(
+                              stream: d.state,
+                              initialData: BluetoothDeviceState.disconnected,
+                              builder: (c, snapshot) {
+                                if (snapshot.data ==
+                                    BluetoothDeviceState.connected) {}
+                                return Text(snapshot.data.toString());
+                              },
+                            ),
+                          ))
+                      .toList(),
+                ),
+              ),
+              StreamBuilder<List<ScanResult>>(
+                stream: FlutterBlue.instance.scanResults,
+                initialData: [],
+                builder: (c, snapshot) => Column(
+                  children: snapshot.data
+                      .map(
+                        (r) => ScanResultTile(
+                          result: r,
+                          onTap: () => Navigator.of(context)
+                              .push(MaterialPageRoute(builder: (context) {
+                            r.device.connect();
+                            return SensorPage(device: r.device);
+                          })),
+                        ),
+                      )
+                      .toList(),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      floatingActionButton: StreamBuilder<bool>(
+        stream: FlutterBlue.instance.isScanning,
+        initialData: false,
+        builder: (c, snapshot) {
+          if (snapshot.data) {
+            return FloatingActionButton(
+              child: Icon(Icons.stop),
+              onPressed: () => FlutterBlue.instance.stopScan(),
+              backgroundColor: Colors.red,
+            );
+          } else {
+            return FloatingActionButton(
+                child: Icon(Icons.search),
+                onPressed: () => FlutterBlue.instance
+                    .startScan(timeout: Duration(seconds: 4)));
+          }
+        },
+      ),
+    );
+  }
+}
+© 2021 GitHub, Inc.
+Terms
+Privacy

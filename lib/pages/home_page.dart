@@ -1,7 +1,7 @@
 import 'package:esp32_connectivity/pages/bluetooth_page.dart';
 import 'package:esp32_connectivity/pages/general_page.dart';
-import 'package:esp32_connectivity/pages/results_page.dart';
 import 'package:esp32_connectivity/pages/wifi_page.dart';
+import 'package:flutter_blue/flutter_blue.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
@@ -33,7 +33,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _listPages
     ..add(GeneralPage(title: "General",))
-    ..add(BluetoothPage(title: "Bluetooth",))
+    ..add(const BluetoothPage(title: "Bluetooth", state: BluetoothState.unknown,))
     ..add(WifiPage(title: "Wifi",));
     _currentPage = const GeneralPage(title: "General");
   }

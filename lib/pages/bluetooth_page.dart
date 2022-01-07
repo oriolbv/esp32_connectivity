@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
+import 'package:esp32_connectivity/widgets.dart';
 
 class BluetoothPage extends StatelessWidget {
   const BluetoothPage({Key? key, required this.title, required this.state}) : super(key: key);
@@ -39,7 +42,7 @@ class FindDevicesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Find Devices'),
+        title: const Text('Find Devices'),
       ),
       body: RefreshIndicator(
         onRefresh: () =>
@@ -52,7 +55,7 @@ class FindDevicesScreen extends StatelessWidget {
                     .asyncMap((_) => FlutterBlue.instance.connectedDevices),
                 initialData: [],
                 builder: (c, snapshot) => Column(
-                  children: snapshot.data
+                  children: snapshot.data!
                       .map((d) => ListTile(
                             title: Text(d.name),
                             subtitle: Text(d.id.toString()),
@@ -73,15 +76,15 @@ class FindDevicesScreen extends StatelessWidget {
                 stream: FlutterBlue.instance.scanResults,
                 initialData: [],
                 builder: (c, snapshot) => Column(
-                  children: snapshot.data
+                  children: snapshot.data!
                       .map(
                         (r) => ScanResultTile(
-                          result: r,
-                          onTap: () => Navigator.of(context)
-                              .push(MaterialPageRoute(builder: (context) {
-                            r.device.connect();
-                            return SensorPage(device: r.device);
-                          })),
+                          result: r, onTap: () {  },
+                          // onTap: () => Navigator.of(context)
+                          //     .push(MaterialPageRoute(builder: (context) {
+                          //   r.device.connect();
+                          //   return SensorPage(device: r.device);
+                          // })),
                         ),
                       )
                       .toList(),
@@ -95,7 +98,7 @@ class FindDevicesScreen extends StatelessWidget {
         stream: FlutterBlue.instance.isScanning,
         initialData: false,
         builder: (c, snapshot) {
-          if (snapshot.data) {
+          if (snapshot.data != null) {
             return FloatingActionButton(
               child: Icon(Icons.stop),
               onPressed: () => FlutterBlue.instance.stopScan(),
@@ -112,6 +115,3 @@ class FindDevicesScreen extends StatelessWidget {
     );
   }
 }
-© 2021 GitHub, Inc.
-Terms
-Privacy

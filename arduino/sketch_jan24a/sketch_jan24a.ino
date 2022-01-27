@@ -23,6 +23,8 @@ unsigned long dataMillis = 0;
 unsigned long count = 0;
 bool signupOK = false;
 
+unsigned long myTime;
+
 /* 4. Define the user Email and password that alreadey registerd or added in your project */
 #define USER_EMAIL "oriolbv@gmail.com"
 #define USER_PASSWORD "gasgas"
@@ -88,5 +90,9 @@ void setup() {
 }
 void loop() {
   delay(5000);
-  Serial.printf("Set int... %s\n", Firebase.RTDB.setInt(&fbdo, "/test/int", count++) ? "ok" : fbdo.errorReason().c_str());
+  myTime = millis();
+  String hola = "/test/"+ (String)myTime +"/temperature_degrees";
+  Serial.printf("Set temperature... %s\n", Firebase.RTDB.setInt(&fbdo, hola, random(-20, 48)) ? "ok" : fbdo.errorReason().c_str());
+  //Serial.printf("Set humidity... %s\n", Firebase.RTDB.setInt(&fbdo, "/test/humidity", random(1, 100)) ? "ok" : fbdo.errorReason().c_str());
+  //Serial.printf("Set ppp... %s\n", Firebase.RTDB.setFloat(&fbdo, "/test/ppp", random(1, 99) / 100.0) ? "ok" : fbdo.errorReason().c_str());
 }
